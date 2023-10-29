@@ -42,16 +42,13 @@ namespace ent_server.Controllers
 
         [HttpPost]
         [Route("login")]
-        public ActionResult LoginUser(String email, String password)
+        public ActionResult LoginUser(LoginUser user)
         {
-            Console.WriteLine(email);
-            Console.WriteLine(password);
+            User? existingUser = _userContext.Users.Where(u => u.Email == user.email).FirstOrDefault();
 
-            User? user = _userContext.Users.Where(u => u.Email == email).FirstOrDefault();
+            if (existingUser == null) { return BadRequest(new { success = false, error = "User does not exist" }); }
 
-            if (user == null) { return BadRequest(new { success = false, error = "User does not exist" }); }
-
-            if (BCrypt.Net.BCrypt.Verify(password, user.Password))
+            if (BCrypt.Net.BCrypt.Verify(user.password, existingUser.Password))
             {
                 return Ok(new { success = true, token = "ABC123" });
             }
